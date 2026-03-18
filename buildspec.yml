@@ -1,21 +1,25 @@
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - echo Installing dependencies
   pre_build:
     commands:
       - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 584164023599.dkr.ecr.us-east-1.amazonaws.com
+
+      - echo Updating kubeconfig
+      - aws eks update-kubeconfig --region us-east-1 --name Project
+
   build:
     commands:
       - echo Build Docker image
       - docker build -t devops/project .
       - docker tag devops/project:latest 584164023599.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
+
   post_build:
     commands:
       - echo Push image to ECR
       - docker push 584164023599.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
-      - kubectl apply -f deployment.yaml
-      - kubectl apply -f service.yaml
+
+      - echo Deploying to EKS
+      - kubectl apply -f deployment.yaml --validate=false
+      - kubectl apply -f service.yaml --validate=false  
