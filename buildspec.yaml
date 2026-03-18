@@ -7,15 +7,15 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR
-      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 410974773240.dkr.ecr.us-east-2.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 584164023599.dkr.ecr.us-east-1.amazonaws.com
   build:
     commands:
       - echo Build Docker image
-      - docker build -t brain-app .
-      - docker tag brain-app:latest 410974773240.dkr.ecr.us-east-2.amazonaws.com/devops/project:latest
+      - docker build -t devops/project .
+      - docker tag devops/project:latest 584164023599.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
   post_build:
     commands:
       - echo Push image to ECR
-      - docker push 410974773240.dkr.ecr.us-east-2.amazonaws.com/devops/project:latest
+      - docker push 584164023599.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
       - kubectl apply -f deployment.yaml
       - kubectl apply -f service.yaml
