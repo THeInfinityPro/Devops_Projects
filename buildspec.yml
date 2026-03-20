@@ -9,6 +9,10 @@ phases:
       - echo Updating kubeconfig
       - aws eks update-kubeconfig --region us-east-1 --name Project
 
+      - export KUBECONFIG=/root/.kube/config
+      - aws sts get-caller-identity
+      - kubectl get nodes  
+
   build:
     commands:
       - echo Build Docker image
