@@ -7,7 +7,7 @@ phases:
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 584164023599.dkr.ecr.us-east-1.amazonaws.com
 
       - echo Updating kubeconfig
-      - aws eks update-kubeconfig --region us-east-1 --name Project1
+      - aws eks update-kubeconfig --region us-east-1 --name Project
 
   build:
     commands:
