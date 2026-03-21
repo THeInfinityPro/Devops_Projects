@@ -114,7 +114,7 @@ kubectl get svc
 👉 Replace with your actual ARN:
 
 ```
-arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
+arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/a7ef11ae6124c4433ab9f63c5fccdbb5
 ```
 
 ---
