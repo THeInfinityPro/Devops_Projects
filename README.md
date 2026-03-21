@@ -141,6 +141,9 @@ arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/a7ef11ae6124c44
 
 ![LB](screenshots/loadbalancer.PNG)
 
+### ✅ CloudWatch
+
+![cloudwatch](screenshots/cloudwatch.PNG)
 ---
 
 ## ❗ Challenges Faced
