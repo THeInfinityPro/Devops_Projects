@@ -1,87 +1,61 @@
-# 🚀 AWS DevOps CI/CD Pipeline with EKS, CodePipeline & CodeBuild
+# 🚀 AWS DevOps CI/CD Pipeline with EKS
 
-## 📌 Project Overview
+## 📌 Project Description
 
-This project demonstrates a complete **CI/CD pipeline on AWS** to build, push, and deploy a containerized application into **Amazon EKS (Elastic Kubernetes Service)**.
-
-It automates the entire workflow from source code to deployment using AWS native services.
+This project demonstrates an end-to-end **CI/CD pipeline** using AWS services to build, push, and deploy a containerized application to **Amazon EKS (Kubernetes)**.
 
 ---
 
 ## 🧰 Tech Stack
 
-* ☁️ AWS CodePipeline
-* 🏗️ AWS CodeBuild
-* 📦 Amazon ECR (Elastic Container Registry)
-* ☸️ Amazon EKS (Kubernetes)
-* 🐳 Docker
-* 🔧 kubectl
-* 🔐 IAM (Roles & Policies)
+* AWS CodePipeline
+* AWS CodeBuild
+* Amazon ECR
+* Amazon EKS
+* Docker
+* Kubernetes (kubectl)
+* IAM
 
 ---
 
-## 🔄 CI/CD Workflow
+## 🔄 CI/CD Pipeline Flow
 
 1. **Source Stage**
 
-   * Code is stored in GitHub repository
+   * Code fetched from GitHub
 
 2. **Build Stage (CodeBuild)**
 
    * Build Docker image
-   * Tag image
    * Push image to Amazon ECR
 
-3. **Deploy Stage (Handled in Buildspec)**
+3. **Deploy Stage (inside buildspec)**
 
    * Update kubeconfig
-   * Connect to EKS cluster
-   * Deploy application using Kubernetes manifests
+   * Connect to EKS
+   * Deploy using Kubernetes YAML
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-GitHub → CodePipeline → CodeBuild → ECR → EKS Cluster
-```
-
----
-
-## 📂 Project Structure
-
-```
-.
-├── buildspec.yml
-├── deployment.yaml
-├── service.yaml
-├── Dockerfile
-└── README.md
+GitHub → CodePipeline → CodeBuild → ECR → EKS → LoadBalancer
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1️⃣ Create ECR Repository
+### 1. Create EKS Cluster
 
 ```bash
-aws ecr create-repository --repository-name devops/project
+eksctl create cluster --name Project --region us-east-1
 ```
 
 ---
 
-### 2️⃣ Create EKS Cluster
-
-```bash
-eksctl create cluster \
-  --name Project \
-  --region us-east-1
-```
-
----
-
-### 3️⃣ Configure kubectl
+### 2. Configure kubectl
 
 ```bash
 aws eks update-kubeconfig --region us-east-1 --name Project
@@ -89,152 +63,101 @@ aws eks update-kubeconfig --region us-east-1 --name Project
 
 ---
 
-### 4️⃣ Create IAM Role for CodeBuild
-
-Ensure the role has:
-
-* ECR access
-* EKS access
-* CloudWatch logs permissions
-
----
-
-### 5️⃣ Buildspec Configuration
-
-```yaml
-version: 0.2
-
-phases:
-  pre_build:
-    commands:
-      - echo Logging in to Amazon ECR
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
-
-      - echo Updating kubeconfig
-      - aws eks update-kubeconfig --region us-east-1 --name Project
-
-  build:
-    commands:
-      - docker build -t devops/project .
-      - docker tag devops/project:latest <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
-
-  post_build:
-    commands:
-      - docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
-      - kubectl apply -f deployment.yaml
-      - kubectl apply -f service.yaml
-```
-
----
-
-## 🔐 IAM Permissions Required
-
-### CodeBuild Role:
-
-* `AmazonEC2ContainerRegistryFullAccess`
-* `AmazonEKSClusterPolicy`
-* `AmazonEKSWorkerNodePolicy`
-* `CloudWatchLogsFullAccess`
-
----
-
-## ☸️ Kubernetes Deployment
-
-### Deployment
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: devops-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: devops-app
-  template:
-    metadata:
-      labels:
-        app: devops-app
-    spec:
-      containers:
-      - name: devops-container
-        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/devops/project:latest
-        ports:
-        - containerPort: 80
-```
-
----
-
-### Service
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: devops-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: devops-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-```
-
----
-
-## ✅ Verification
+### 3. Create ECR Repository
 
 ```bash
-kubectl get nodes
-kubectl get pods
+aws ecr create-repository --repository-name devops/project
+```
+
+---
+
+### 4. IAM Configuration
+
+* Attach required policies to CodeBuild role:
+
+  * ECR access
+  * EKS access
+  * CloudWatch Logs access
+
+---
+
+### 5. Run Pipeline
+
+* Trigger pipeline manually or via GitHub push
+
+---
+
+## 📦 Deployment Files
+
+### deployment.yaml
+
+* Creates Kubernetes deployment with replicas
+
+### service.yaml
+
+* Exposes application using LoadBalancer
+
+---
+
+## 🌐 Application Access
+
+Get LoadBalancer:
+
+```bash
 kubectl get svc
 ```
 
 ---
 
-## 🌐 Access Application
+## 🔗 LoadBalancer ARN
 
-Once deployed, get the external IP:
-
-```bash
-kubectl get svc devops-service
-```
-
-Open in browser:
+👉 Replace with your actual ARN:
 
 ```
-http://<EXTERNAL-IP>
+arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
 ```
+
+---
+
+## 📸 Screenshots
+
+### ✅ Pipeline Success
+
+![Pipeline](screenshots/pipeline-success.png)
+
+### ✅ CodeBuild Logs
+
+![Build](screenshots/codebuild-success.png)
+
+### ✅ EKS Nodes
+
+![Nodes](screenshots/eks-nodes.png)
+
+### ✅ Application Running
+
+![App](screenshots/app-running.png)
+
+### ✅ LoadBalancer
+
+![LB](screenshots/loadbalancer.png)
 
 ---
 
 ## ❗ Challenges Faced
 
-* IAM role mapping with EKS (`aws-auth ConfigMap`)
-* CodeBuild authentication to EKS
-* Cluster access permissions
-* CodePipeline deploy stage issues
+* IAM role mapping with EKS
+* CodeBuild authentication issues
+* CodePipeline deploy stage failure
+* LoadBalancer exposure setup
 
 ---
 
 ## 💡 Key Learnings
 
-* End-to-end CI/CD pipeline setup
-* IAM role-based authentication in EKS
-* Docker image lifecycle management
-* Kubernetes deployment automation
-
----
-
-## 🚀 Future Improvements
-
-* Add Helm charts
-* Implement Blue/Green deployment
-* Add monitoring (Prometheus & Grafana)
-* Enable HTTPS using Ingress + ALB
+* CI/CD automation on AWS
+* Kubernetes deployment process
+* IAM role-based access control
+* Debugging real-world DevOps issues
 
 ---
 
@@ -245,5 +168,3 @@ DevOps Engineer (Fresher)
 Chennai, India
 
 ---
-
-⭐ If you found this project helpful, give it a star!
