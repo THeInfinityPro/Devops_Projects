@@ -127,7 +127,7 @@ arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
 
 ### ✅ CodeBuild Logs
 
-![Build](screenshots/codebuild-success.PNG)
+![Build](screenshots/codebuild-sucess.PNG)
 
 ### ✅ EKS Nodes
 
@@ -135,7 +135,7 @@ arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
 
 ### ✅ Application Running
 
-![App](screenshots/app-running.PNG)
+![App](screenshots/app-running.png)
 
 ### ✅ LoadBalancer
 
