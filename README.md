@@ -1,246 +1,170 @@
-# 🚀 DevOps End-to-End CI/CD Project (Docker + Jenkins + EKS)
+# 🚀 AWS DevOps CI/CD Pipeline with EKS
+
+## 📌 Project Description
+
+This project demonstrates an end-to-end **CI/CD pipeline** using AWS services to build, push, and deploy a containerized application to **Amazon EKS (Kubernetes)**.
 
 ---
 
-## 📌 Project Overview
+## 🧰 Tech Stack
 
-This project demonstrates a complete **CI/CD pipeline** for deploying a production-ready web application using modern DevOps tools.
+* AWS CodePipeline
+* AWS CodeBuild
+* Amazon ECR
+* Amazon EKS
+* Docker
+* Kubernetes (kubectl)
+* IAM
 
-The application is a static frontend build (`dist/`) served using **Nginx**, containerized with Docker, and deployed on **AWS EKS (Kubernetes)** using Jenkins automation.
+---
+
+## 🔄 CI/CD Pipeline Flow
+
+1. **Source Stage**
+
+   * Code fetched from GitHub
+
+2. **Build Stage (CodeBuild)**
+
+   * Build Docker image
+   * Push image to Amazon ECR
+
+3. **Deploy Stage (inside buildspec)**
+
+   * Update kubeconfig
+   * Connect to EKS
+   * Deploy using Kubernetes YAML
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-GitHub → Jenkins → Docker → DockerHub → Kubernetes (EKS) → LoadBalancer → Browser
-```
-
----
-
-## 🛠️ Tools & Technologies
-
-* **AWS** (EC2, EKS, LoadBalancer)
-* **Jenkins** (CI/CD Pipeline)
-* **Docker** (Containerization)
-* **DockerHub** (Image Registry)
-* **Kubernetes (EKS)** (Deployment)
-* **GitHub** (Version Control)
-* **Nginx** (Web Server)
-* **Vite (Frontend Build Tool)**
-
----
-
-## 📁 Project Structure
-
-```
-Devops-Project-2/
-│
-├── dist/                  # Production build (static files)
-├── Dockerfile             # Docker configuration
-├── deployment.yaml        # Kubernetes Deployment
-├── service.yaml           # Kubernetes Service
-├── Jenkinsfile            # CI/CD Pipeline script
-├── .gitignore
-└── README.md
+GitHub → CodePipeline → CodeBuild → ECR → EKS → LoadBalancer
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
----
+### 1. Create EKS Cluster
 
-### 1️⃣ Clone Repository
-
-```
-git clone https://github.com/THeInfinityPro/Devops-Project-2.git
-cd Devops-Project-2
-```
-
----
-
-### 2️⃣ Docker Setup
-
-#### Build Docker Image
-
-```
-docker build -t <dockerhub-username>/project .
-```
-
-#### Run Container (Local Test)
-
-```
-docker run -d -p 3000:80 <dockerhub-username>/project
-```
-
----
-
-### 3️⃣ Push to DockerHub
-
-```
-docker login
-docker push <dockerhub-username>/project
-```
-
----
-
-### 4️⃣ Create EKS Cluster
-
-```
+```bash
 eksctl create cluster --name Project --region us-east-1
 ```
 
 ---
 
-### 5️⃣ Deploy to Kubernetes
+### 2. Configure kubectl
 
-```
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-```
-
----
-
-### 6️⃣ Get Application URL
-
-```
-kubectl get svc
-```
-
-Open in browser:
-
-```
-http://<EXTERNAL-IP>
+```bash
+aws eks update-kubeconfig --region us-east-1 --name Project
 ```
 
 ---
 
-## 🔁 CI/CD Pipeline Explanation
+### 3. Create ECR Repository
 
-The Jenkins pipeline automates the deployment process using the following stages:
-
----
-
-### 🔹 Stage 1: Clone Repository
-
-* Pulls latest code from GitHub
-
----
-
-### 🔹 Stage 2: Build Docker Image
-
-* Builds Docker image using Dockerfile
-* Uses Nginx to serve static files
-
----
-
-### 🔹 Stage 3: Push to DockerHub
-
-* Logs into DockerHub using credentials
-* Pushes image to Docker registry
-
----
-
-### 🔹 Stage 4: Deploy to Kubernetes
-
-* Applies deployment.yaml
-* Applies service.yaml
-* Creates pods and LoadBalancer
-
----
-
-### 🔹 Pipeline Flow
-
-```
-Code Push → Jenkins Trigger → Build → Push → Deploy → Live App
+```bash
+aws ecr create-repository --repository-name devops/project
 ```
 
 ---
 
-## 📸 Screenshots (Add Here)
+### 4. IAM Configuration
 
-### 🔹 Jenkins Pipeline
+* Attach required policies to CodeBuild role:
 
-(Add screenshot of successful pipeline)
-
----
-
-### 🔹 DockerHub Image
-
-(Add screenshot of pushed image)
+  * ECR access
+  * EKS access
+  * CloudWatch Logs access
 
 ---
 
-### 🔹 Kubernetes Pods
+### 5. Run Pipeline
 
-```
-kubectl get pods
-```
+* Trigger pipeline manually or via GitHub push
 
 ---
 
-### 🔹 Kubernetes Services
+## 📦 Deployment Files
 
-```
+### deployment.yaml
+
+* Creates Kubernetes deployment with replicas
+
+### service.yaml
+
+* Exposes application using LoadBalancer
+
+---
+
+## 🌐 Application Access
+
+Get LoadBalancer:
+
+```bash
 kubectl get svc
 ```
 
 ---
 
-### 🔹 Application Output
+## 🔗 LoadBalancer ARN
 
-(Add browser screenshot of running application)
+👉 Replace with your actual ARN:
 
----
-
-## ⚠️ Challenges Faced
-
-* GitHub webhook not triggering Jenkins
-* Wrong Git branch (master vs main)
-* Docker permission issues
-* DockerHub authentication failure
-* Kubernetes authentication error
-* LoadBalancer not working
-* Static images not loading (Vite base path issue)
+```
+arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
+```
 
 ---
 
-## 💡 Solutions Implemented
+## 📸 Screenshots
 
-* Configured webhook correctly with public IP
-* Updated branch to `main`
-* Added Jenkins user to Docker group
-* Used DockerHub access token
-* Configured kubeconfig for Jenkins
-* Fixed service port mismatch
-* Updated Vite base path (`base: "./"`)
+### ✅ Pipeline Success
+
+![Pipeline](screenshots/pipeline-success.png)
+
+### ✅ CodeBuild Logs
+
+![Build](screenshots/codebuild-success.png)
+
+### ✅ EKS Nodes
+
+![Nodes](screenshots/eks-nodes.png)
+
+### ✅ Application Running
+
+![App](screenshots/app-running.png)
+
+### ✅ LoadBalancer
+
+![LB](screenshots/loadbalancer.png)
 
 ---
 
-## 🎯 Key Learnings
+## ❗ Challenges Faced
 
-* CI/CD pipeline automation using Jenkins
-* Docker image lifecycle management
-* Kubernetes deployment in AWS EKS
+* IAM role mapping with EKS
+* CodeBuild authentication issues
+* CodePipeline deploy stage failure
+* LoadBalancer exposure setup
+
+---
+
+## 💡 Key Learnings
+
+* CI/CD automation on AWS
+* Kubernetes deployment process
+* IAM role-based access control
 * Debugging real-world DevOps issues
-* Handling networking and authentication errors
-
----
-
-## 💰 Cleanup (Important)
-
-To avoid AWS charges:
-
-```
-eksctl delete cluster --name Project --region us-east-1
-```
 
 ---
 
 ## 👨‍💻 Author
 
 **Jagadish V**
-DevOps Enthusiast 🚀
+DevOps Engineer (Fresher)
+Chennai, India
 
 ---
