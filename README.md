@@ -1,173 +1,259 @@
-# 🚀 AWS DevOps CI/CD Pipeline with EKS
+# 🚀 DevOps End-to-End CI/CD Project (Docker + Jenkins + EKS)
 
-## 📌 Project Description
+## 📌 Project Overview
 
-This project demonstrates an end-to-end **CI/CD pipeline** using AWS services to build, push, and deploy a containerized application to **Amazon EKS (Kubernetes)**.
+This project demonstrates a complete **DevOps CI/CD pipeline** for deploying a static web application using:
 
----
+* GitHub (Source Code)
+* Jenkins (CI/CD Automation)
+* Docker (Containerization)
+* DockerHub (Image Registry)
+* Kubernetes (EKS) (Deployment)
+* AWS (Infrastructure)
 
-## 🧰 Tech Stack
-
-* AWS CodePipeline
-* AWS CodeBuild
-* Amazon ECR
-* Amazon EKS
-* Docker
-* Kubernetes (kubectl)
-* IAM
-
----
-
-## 🔄 CI/CD Pipeline Flow
-
-1. **Source Stage**
-
-   * Code fetched from GitHub
-
-2. **Build Stage (CodeBuild)**
-
-   * Build Docker image
-   * Push image to Amazon ECR
-
-3. **Deploy Stage (inside buildspec)**
-
-   * Update kubeconfig
-   * Connect to EKS
-   * Deploy using Kubernetes YAML
+The application is a production-ready static build (`dist/`) served using **Nginx**.
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-GitHub → CodePipeline → CodeBuild → ECR → EKS → LoadBalancer
+GitHub → Jenkins → Docker → DockerHub → Kubernetes (EKS) → LoadBalancer → Browser
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## 📁 Project Structure
 
-### 1. Create EKS Cluster
+```
+Devops-Project-2/
+│
+├── dist/                  # Static application files
+├── Dockerfile             # Docker configuration
+├── nginx.conf             # Nginx config (if used)
+├── deployment.yaml        # Kubernetes Deployment
+├── service.yaml           # Kubernetes Service
+├── Jenkinsfile            # CI/CD Pipeline
+├── .gitignore
+└── README.md
+```
 
-```bash
+---
+
+## ⚙️ Technologies Used
+
+* AWS EC2, EKS
+* Docker
+* Kubernetes
+* Jenkins
+* GitHub
+* Nginx
+
+---
+
+## 🚀 Step-by-Step Implementation
+
+### 1️⃣ Clone Repository
+
+```
+git clone https://github.com/<your-username>/Devops-Project-2.git
+cd Devops-Project-2
+```
+
+---
+
+### 2️⃣ Docker Setup
+
+#### Build Docker Image
+
+```
+docker build -t <dockerhub-username>/project .
+```
+
+#### Run Container (Optional Test)
+
+```
+docker run -d -p 3000:80 <dockerhub-username>/project
+```
+
+---
+
+### 3️⃣ Push Image to DockerHub
+
+```
+docker login
+docker push <dockerhub-username>/project
+```
+
+---
+
+### 4️⃣ Create EKS Cluster
+
+```
 eksctl create cluster --name Project --region us-east-1
 ```
 
 ---
 
-### 2. Configure kubectl
+### 5️⃣ Deploy to Kubernetes
 
-```bash
+```
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+```
+
+---
+
+### 6️⃣ Get Application URL
+
+```
+kubectl get svc
+```
+
+Open:
+
+```
+http://<EXTERNAL-IP>
+```
+
+---
+
+## 🔁 Jenkins CI/CD Pipeline
+
+### Pipeline Stages:
+
+1. Clone repository from GitHub
+2. Build Docker image
+3. Push image to DockerHub
+4. Deploy to Kubernetes
+
+---
+
+### Jenkinsfile (Simplified)
+
+```
+pipeline {
+    agent any
+
+    environment {
+        IMAGE = "<dockerhub-username>/project"
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {
+                sh 'docker build -t $IMAGE .'
+            }
+        }
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $IMAGE
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
+            }
+        }
+    }
+}
+```
+
+---
+
+## 📸 Screenshots (Add these)
+
+* Jenkins Pipeline Success
+* DockerHub Image
+* Kubernetes Pods (`kubectl get pods`)
+* Kubernetes Services (`kubectl get svc`)
+* Application Running in Browser
+
+---
+
+## 🔐 Jenkins Configuration
+
+### Required Plugins:
+
+* Git Plugin
+* GitHub Plugin
+* Docker Pipeline
+* Kubernetes CLI
+* Pipeline Plugin
+
+---
+
+### Credentials:
+
+* DockerHub Username & Access Token
+* AWS Credentials
+
+---
+
+## ⚠️ Common Issues & Fixes
+
+### 1. Docker Permission Denied
+
+```
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+```
+
+---
+
+### 2. Kubernetes Authentication Error
+
+```
 aws eks update-kubeconfig --region us-east-1 --name Project
 ```
 
 ---
 
-### 3. Create ECR Repository
+### 3. LoadBalancer Not Working
 
-```bash
-aws ecr create-repository --repository-name devops/project
+* Ensure correct `targetPort` (80 for Nginx)
+* Check Security Group allows port 80
+
+---
+
+## 💰 Cleanup (Important)
+
+To avoid AWS charges:
+
+```
+eksctl delete cluster --name Project --region us-east-1
 ```
 
 ---
 
-### 4. IAM Configuration
+## 🎯 Key Learning Outcomes
 
-* Attach required policies to CodeBuild role:
-
-  * ECR access
-  * EKS access
-  * CloudWatch Logs access
-
----
-
-### 5. Run Pipeline
-
-* Trigger pipeline manually or via GitHub push
+* CI/CD Pipeline Automation
+* Docker Image Creation & Management
+* Kubernetes Deployment on AWS EKS
+* Jenkins Integration with GitHub
+* Real-world DevOps workflow
 
 ---
 
-## 📦 Deployment Files
+## 🙌 Conclusion
 
-### deployment.yaml
-
-* Creates Kubernetes deployment with replicas
-
-### service.yaml
-
-* Exposes application using LoadBalancer
+This project demonstrates a **real-world DevOps pipeline**, integrating multiple tools to automate build, push, and deployment processes efficiently.
 
 ---
 
-## 🌐 Application Access
-
-Get LoadBalancer:
-
-```bash
-kubectl get svc
-```
-
----
-
-## 🔗 LoadBalancer ARN
-
-👉 Replace with your actual ARN:
-
-```
-arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/a7ef11ae6124c4433ab9f63c5fccdbb5
-```
-
----
-
-## 📸 Screenshots
-
-### ✅ Pipeline Success
-
-![Pipeline](screenshots/pipeline-success.PNG)
-
-### ✅ CodeBuild Logs
-
-![Build](screenshots/codebuild-sucess.PNG)
-
-### ✅ EKS Nodes
-
-![Nodes](screenshots/eks-nodes.PNG)
-
-### ✅ Application Running
-
-![App](screenshots/app-running.png)
-
-### ✅ LoadBalancer
-
-![LB](screenshots/loadbalancer.PNG)
-
-### ✅ CloudWatch
-
-![cloudwatch](screenshots/cloudwatch.PNG)
----
-
-## ❗ Challenges Faced
-
-* IAM role mapping with EKS
-* CodeBuild authentication issues
-* CodePipeline deploy stage failure
-* LoadBalancer exposure setup
-
----
-
-## 💡 Key Learnings
-
-* CI/CD automation on AWS
-* Kubernetes deployment process
-* IAM role-based access control
-* Debugging real-world DevOps issues
-
----
-
-## 👨‍💻 Author
+## ⭐ Author
 
 **Jagadish V**
-DevOps Engineer (Fresher)
-Chennai, India
+DevOps Enthusiast 🚀
 
 ---
