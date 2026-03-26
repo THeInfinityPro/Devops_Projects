@@ -1,17 +1,12 @@
 # 🚀 DevOps End-to-End CI/CD Project (Docker + Jenkins + EKS)
 
+---
+
 ## 📌 Project Overview
 
-This project demonstrates a complete **DevOps CI/CD pipeline** for deploying a static web application using:
+This project demonstrates a complete **CI/CD pipeline** for deploying a production-ready web application using modern DevOps tools.
 
-* GitHub (Source Code)
-* Jenkins (CI/CD Automation)
-* Docker (Containerization)
-* DockerHub (Image Registry)
-* Kubernetes (EKS) (Deployment)
-* AWS (Infrastructure)
-
-The application is a production-ready static build (`dist/`) served using **Nginx**.
+The application is a static frontend build (`dist/`) served using **Nginx**, containerized with Docker, and deployed on **AWS EKS (Kubernetes)** using Jenkins automation.
 
 ---
 
@@ -23,40 +18,43 @@ GitHub → Jenkins → Docker → DockerHub → Kubernetes (EKS) → LoadBalance
 
 ---
 
+## 🛠️ Tools & Technologies
+
+* **AWS** (EC2, EKS, LoadBalancer)
+* **Jenkins** (CI/CD Pipeline)
+* **Docker** (Containerization)
+* **DockerHub** (Image Registry)
+* **Kubernetes (EKS)** (Deployment)
+* **GitHub** (Version Control)
+* **Nginx** (Web Server)
+* **Vite (Frontend Build Tool)**
+
+---
+
 ## 📁 Project Structure
 
 ```
 Devops-Project-2/
 │
-├── dist/                  # Static application files
+├── dist/                  # Production build (static files)
 ├── Dockerfile             # Docker configuration
-├── nginx.conf             # Nginx config (if used)
 ├── deployment.yaml        # Kubernetes Deployment
 ├── service.yaml           # Kubernetes Service
-├── Jenkinsfile            # CI/CD Pipeline
+├── Jenkinsfile            # CI/CD Pipeline script
 ├── .gitignore
 └── README.md
 ```
 
 ---
 
-## ⚙️ Technologies Used
-
-* AWS EC2, EKS
-* Docker
-* Kubernetes
-* Jenkins
-* GitHub
-* Nginx
+## ⚙️ Setup Instructions
 
 ---
-
-## 🚀 Step-by-Step Implementation
 
 ### 1️⃣ Clone Repository
 
 ```
-git clone https://github.com/<your-username>/Devops-Project-2.git
+git clone https://github.com/THeInfinityPro/Devops-Project-2.git
 cd Devops-Project-2
 ```
 
@@ -70,7 +68,7 @@ cd Devops-Project-2
 docker build -t <dockerhub-username>/project .
 ```
 
-#### Run Container (Optional Test)
+#### Run Container (Local Test)
 
 ```
 docker run -d -p 3000:80 <dockerhub-username>/project
@@ -78,7 +76,7 @@ docker run -d -p 3000:80 <dockerhub-username>/project
 
 ---
 
-### 3️⃣ Push Image to DockerHub
+### 3️⃣ Push to DockerHub
 
 ```
 docker login
@@ -110,118 +108,123 @@ kubectl apply -f service.yaml
 kubectl get svc
 ```
 
-Open:
+Open in browser:
 
 ```
-http://af8048354768e4d5892273b811b8f1be-619988372.us-east-1.elb.amazonaws.com/
-```
-
----
-
-## 🔁 Jenkins CI/CD Pipeline
-
-### Pipeline Stages:
-
-1. Clone repository from GitHub
-2. Build Docker image
-3. Push image to DockerHub
-4. Deploy to Kubernetes
-
----
-
-### Jenkinsfile (Simplified)
-
-```
-pipeline {
-    agent any
-
-    environment {
-        IMAGE = "<dockerhub-username>/project"
-    }
-
-    stages {
-
-        stage('Build') {
-            steps {
-                sh 'docker build -t $IMAGE .'
-            }
-        }
-
-        stage('Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push $IMAGE
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
-            }
-        }
-    }
-}
+http://<EXTERNAL-IP>
 ```
 
 ---
 
-## 📸 Screenshots (Add these)
+## 🔁 CI/CD Pipeline Explanation
 
-* Jenkins Pipeline Success
-* DockerHub Image
-* Kubernetes Pods (`kubectl get pods`)
-* Kubernetes Services (`kubectl get svc`)
-* Application Running in Browser
+The Jenkins pipeline automates the deployment process using the following stages:
 
 ---
 
-## 🔐 Jenkins Configuration
+### 🔹 Stage 1: Clone Repository
 
-### Required Plugins:
-
-* Git Plugin
-* GitHub Plugin
-* Docker Pipeline
-* Kubernetes CLI
-* Pipeline Plugin
+* Pulls latest code from GitHub
 
 ---
 
-### Credentials:
+### 🔹 Stage 2: Build Docker Image
 
-* DockerHub Username & Access Token
-* AWS Credentials
+* Builds Docker image using Dockerfile
+* Uses Nginx to serve static files
 
 ---
 
-## ⚠️ Common Issues & Fixes
+### 🔹 Stage 3: Push to DockerHub
 
-### 1. Docker Permission Denied
+* Logs into DockerHub using credentials
+* Pushes image to Docker registry
+
+---
+
+### 🔹 Stage 4: Deploy to Kubernetes
+
+* Applies deployment.yaml
+* Applies service.yaml
+* Creates pods and LoadBalancer
+
+---
+
+### 🔹 Pipeline Flow
 
 ```
-sudo usermod -aG docker jenkins
-sudo systemctl restart jenkins
-```
-
----
-
-### 2. Kubernetes Authentication Error
-
-```
-aws eks update-kubeconfig --region us-east-1 --name Project
+Code Push → Jenkins Trigger → Build → Push → Deploy → Live App
 ```
 
 ---
 
-### 3. LoadBalancer Not Working
+## 📸 Screenshots (Add Here)
 
-* Ensure correct `targetPort` (80 for Nginx)
-* Check Security Group allows port 80
+### 🔹 Jenkins Pipeline
+
+(Add screenshot of successful pipeline)
+
+---
+
+### 🔹 DockerHub Image
+
+(Add screenshot of pushed image)
+
+---
+
+### 🔹 Kubernetes Pods
+
+```
+kubectl get pods
+```
+
+---
+
+### 🔹 Kubernetes Services
+
+```
+kubectl get svc
+```
+
+---
+
+### 🔹 Application Output
+
+(Add browser screenshot of running application)
+
+---
+
+## ⚠️ Challenges Faced
+
+* GitHub webhook not triggering Jenkins
+* Wrong Git branch (master vs main)
+* Docker permission issues
+* DockerHub authentication failure
+* Kubernetes authentication error
+* LoadBalancer not working
+* Static images not loading (Vite base path issue)
+
+---
+
+## 💡 Solutions Implemented
+
+* Configured webhook correctly with public IP
+* Updated branch to `main`
+* Added Jenkins user to Docker group
+* Used DockerHub access token
+* Configured kubeconfig for Jenkins
+* Fixed service port mismatch
+* Updated Vite base path (`base: "./"`)
+
+---
+
+## 🎯 Key Learnings
+
+* CI/CD pipeline automation using Jenkins
+* Docker image lifecycle management
+* Kubernetes deployment in AWS EKS
+* Debugging real-world DevOps issues
+* Handling networking and authentication errors
 
 ---
 
@@ -235,23 +238,7 @@ eksctl delete cluster --name Project --region us-east-1
 
 ---
 
-## 🎯 Key Learning Outcomes
-
-* CI/CD Pipeline Automation
-* Docker Image Creation & Management
-* Kubernetes Deployment on AWS EKS
-* Jenkins Integration with GitHub
-* Real-world DevOps workflow
-
----
-
-## 🙌 Conclusion
-
-This project demonstrates a **real-world DevOps pipeline**, integrating multiple tools to automate build, push, and deployment processes efficiently.
-
----
-
-## ⭐ Author
+## 👨‍💻 Author
 
 **Jagadish V**
 DevOps Enthusiast 🚀
