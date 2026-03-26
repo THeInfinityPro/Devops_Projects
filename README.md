@@ -123,15 +123,15 @@ arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
 
 ### ✅ Pipeline Success
 
-![Pipeline](screenshots/pipeline-success.png)
+![Pipeline](screenshots/pipeline-success.PNG)
 
 ### ✅ CodeBuild Logs
 
-![Build](screenshots/codebuild-success.png)
+![Build](screenshots/codebuild-success.PMG)
 
 ### ✅ EKS Nodes
 
-![Nodes](screenshots/eks-nodes.png)
+![Nodes](screenshots/eks-nodes.PNG)
 
 ### ✅ Application Running
 
@@ -139,7 +139,7 @@ arn:aws:elasticloadbalancing:us-east-1:584164023599:loadbalancer/xxxxxxxx
 
 ### ✅ LoadBalancer
 
-![LB](screenshots/loadbalancer.png)
+![LB](screenshots/loadbalancer.PNG)
 
 ---
 
